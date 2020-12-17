@@ -21,15 +21,13 @@ pipeline {
     stage('Checkout') {
       steps{
         echo "------------>Checkout<------------"
-
       }
     }
     
     stage('Compile & Unit Tests') {
       steps{
         echo "------------>Unit Tests<------------"
-		sh 'gradle --b ./proyecto1/build.gradle clean'
-		sh 'gradle --b ./build.gradle test'
+
       }
     }
 
@@ -37,16 +35,14 @@ pipeline {
       steps{
         echo '------------>Análisis de código estático<------------'
         withSonarQubeEnv('Sonar') {
-			sh "${tool name: 'SonarScanner', type:'hudson.plugins.sonar.SonarRunnerInstallation'}/bin/sonar-scanner"
-		}
-
+sh "${tool name: 'SonarScanner', type:'hudson.plugins.sonar.SonarRunnerInstallation'}/bin/sonar-scanner -Dproject.settings=sonar-project.properties"
+        }
       }
     }
 
     stage('Build') {
       steps {
         echo "------------>Build<------------"
-		sh 'gradle --b ./build.gradle build -x test'
       }
     }  
   }
@@ -57,12 +53,9 @@ pipeline {
     }
     success {
       echo 'This will run only if successful'
-	  junit 'build/test-results/test/*.xml'
     }
     failure {
       echo 'This will run only if failed'
-	  mail (to: 'yesid.orrego@ceiba.com.co',subject: "Failed 
-	  Pipeline:${currentBuild.fullDisplayName}",body: "Something is wrong with ${env.BUILD_URL}")
     }
     unstable {
       echo 'This will run only if the run was marked as unstable'
